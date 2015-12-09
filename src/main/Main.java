@@ -5,6 +5,8 @@
  */
 package main;
 
+import gui.MainFrame;
+
 /**
  *
  * @author ashik
@@ -14,7 +16,7 @@ public class Main {
     
     public static void main(String[] args) {
 
-        System.out.println("Testing Project......");
+        MainFrame.launch();
     }
     
 }
