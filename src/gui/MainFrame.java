@@ -5,7 +5,13 @@
  */
 package gui;
 
+import database.ConnectToDatabase;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import main.ContactModel;
 
 /**
  *
@@ -13,26 +19,30 @@ import javax.swing.JOptionPane;
  */
 public class MainFrame extends javax.swing.JFrame {
 
-    /**
-     * Creates new form MainFrame
-     */
+    private final DefaultTableModel defaultTableModel;
+    private ResultSet resultSet = null;
+    private List<ContactModel> contactModels;
+    private ContactModel contactModel;
+
     public MainFrame() {
         initComponents();
+
+        this.defaultTableModel = (DefaultTableModel) this.tblContactList.getModel();
+        this.initializeContactList();
     }
 
-    
-    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jMenuItem1 = new javax.swing.JMenuItem();
         pOne = new javax.swing.JPanel();
         bAddNew = new javax.swing.JButton();
         bEdit = new javax.swing.JButton();
         bDelete = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         tfSearchBox = new javax.swing.JTextField();
-        cmSearchBy = new javax.swing.JComboBox();
+        cbSearchBy = new javax.swing.JComboBox();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblContactList = new javax.swing.JTable();
         jLabel2 = new javax.swing.JLabel();
@@ -41,11 +51,14 @@ public class MainFrame extends javax.swing.JFrame {
         mbOne = new javax.swing.JMenuBar();
         jmFile = new javax.swing.JMenu();
         jmiAddNewEntry = new javax.swing.JMenuItem();
+        jmiRefresh = new javax.swing.JMenuItem();
         jmiEditAEntry = new javax.swing.JMenuItem();
-        hmiDeleteAEntry = new javax.swing.JMenuItem();
+        jmiDeleteAEntry = new javax.swing.JMenuItem();
         jmiQuit = new javax.swing.JMenuItem();
         jmHelp = new javax.swing.JMenu();
         jmiNeedHelp = new javax.swing.JMenuItem();
+
+        jMenuItem1.setText("jMenuItem1");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Phone Book Manager");
@@ -73,7 +86,13 @@ public class MainFrame extends javax.swing.JFrame {
 
         jLabel1.setText("Search");
 
-        cmSearchBy.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "By Name", "By Phone Number", "By Email" }));
+        tfSearchBox.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                tfSearchBoxKeyReleased(evt);
+            }
+        });
+
+        cbSearchBy.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "By Name", "By Phone Number", "By Email" }));
 
         tblContactList.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -89,6 +108,11 @@ public class MainFrame extends javax.swing.JFrame {
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
                 return canEdit [columnIndex];
+            }
+        });
+        tblContactList.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblContactListMouseClicked(evt);
             }
         });
         jScrollPane1.setViewportView(tblContactList);
@@ -121,7 +145,7 @@ public class MainFrame extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(tfSearchBox, javax.swing.GroupLayout.DEFAULT_SIZE, 183, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cmSearchBy, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(cbSearchBy, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(pOneLayout.createSequentialGroup()
                         .addGap(58, 58, 58)
                         .addComponent(jLabel2)
@@ -144,7 +168,7 @@ public class MainFrame extends javax.swing.JFrame {
                     .addComponent(bDelete)
                     .addComponent(jLabel1)
                     .addComponent(tfSearchBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cmSearchBy, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cbSearchBy, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(pOneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 445, Short.MAX_VALUE)
@@ -165,6 +189,14 @@ public class MainFrame extends javax.swing.JFrame {
         });
         jmFile.add(jmiAddNewEntry);
 
+        jmiRefresh.setText("Refresh");
+        jmiRefresh.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jmiRefreshActionPerformed(evt);
+            }
+        });
+        jmFile.add(jmiRefresh);
+
         jmiEditAEntry.setText("Edit A Entry");
         jmiEditAEntry.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -173,13 +205,13 @@ public class MainFrame extends javax.swing.JFrame {
         });
         jmFile.add(jmiEditAEntry);
 
-        hmiDeleteAEntry.setText("Delete A Entry");
-        hmiDeleteAEntry.addActionListener(new java.awt.event.ActionListener() {
+        jmiDeleteAEntry.setText("Delete A Entry");
+        jmiDeleteAEntry.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                hmiDeleteAEntryActionPerformed(evt);
+                jmiDeleteAEntryActionPerformed(evt);
             }
         });
-        jmFile.add(hmiDeleteAEntry);
+        jmFile.add(jmiDeleteAEntry);
 
         jmiQuit.setText("Quit");
         jmiQuit.addActionListener(new java.awt.event.ActionListener() {
@@ -220,29 +252,121 @@ public class MainFrame extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void initializeContactList() {
+
+        try {
+
+            this.clearTable();
+
+            this.contactModels = new ArrayList<>();
+
+            this.getContactsFromDatabase();
+
+            for (ContactModel cm : this.contactModels) {
+
+                this.defaultTableModel.addRow(new Object[]{
+                    cm.getName(),
+                    cm.getNumbers()[0]
+                });
+            }
+        } catch (Exception e) {
+
+            JOptionPane.showMessageDialog(null, e);
+        }
+    }
+
+    private void getContactsFromDatabase() {
+
+        try {
+
+            String sql = "SELECT * FROM numbers ORDER BY name ASC";
+
+            this.resultSet = ConnectToDatabase.getResult(sql);
+
+            while (this.resultSet.next()) {
+
+                this.contactModel = new ContactModel();
+
+                this.contactModel.setAddress(this.resultSet.getString("address"));
+                this.contactModel.setEmailID(this.resultSet.getString("mail"));
+                this.contactModel.setName(this.resultSet.getString("name"));
+                this.contactModel.setNumbers(this.resultSet.getString("numbers"));
+                this.contactModel.setWebsite(this.resultSet.getString("website"));
+
+                this.contactModels.add(this.contactModel);
+            }
+        } catch (Exception e) {
+
+            JOptionPane.showMessageDialog(null, e);
+        }
+    }
+
+    private void clearTable() {
+
+        try {
+
+            for (int i = this.defaultTableModel.getRowCount() - 1; i >= 0; i--) {
+
+                this.defaultTableModel.removeRow(i);
+            }
+        } catch (Exception e) {
+
+            JOptionPane.showMessageDialog(null, e);
+        }
+    }
+
+
     private void jmiQuitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmiQuitActionPerformed
 
         try {
-            
+
             System.exit(0);
         } catch (Exception e) {
-            
+
             JOptionPane.showMessageDialog(null, e.toString());
         }
     }//GEN-LAST:event_jmiQuitActionPerformed
 
     private void bAddNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bAddNewActionPerformed
 
-        AddEntry.launch();
+        try {
+
+            AddEntry.launch();
+        } catch (Exception e) {
+
+            JOptionPane.showMessageDialog(null, e);
+        }
     }//GEN-LAST:event_bAddNewActionPerformed
 
     private void bEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bEditActionPerformed
-        
-        EditEntry.launch();
+
+        try {
+
+            EditEntry.launch();
+        } catch (Exception e) {
+
+            JOptionPane.showMessageDialog(null, e);
+        }
     }//GEN-LAST:event_bEditActionPerformed
 
     private void bDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bDeleteActionPerformed
-        // TODO add your handling code here:
+
+        try {
+
+            int index = this.tblContactList.getSelectedRow();
+
+            String sql = "DELETE FROM numbers WHERE name = \""
+                    + this.defaultTableModel.getValueAt(index, 0) + "\"";
+
+            ConnectToDatabase.getResult(sql);
+
+            this.defaultTableModel.removeRow(index);
+            this.contactModels.remove(index);
+            this.tfDetailsInformation.setText("");
+        } catch (Exception e) {
+
+            JOptionPane.showMessageDialog(null, e);
+        }
     }//GEN-LAST:event_bDeleteActionPerformed
 
     private void jmiAddNewEntryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmiAddNewEntryActionPerformed
@@ -255,17 +379,84 @@ public class MainFrame extends javax.swing.JFrame {
         this.bEditActionPerformed(evt);
     }//GEN-LAST:event_jmiEditAEntryActionPerformed
 
-    private void hmiDeleteAEntryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hmiDeleteAEntryActionPerformed
+    private void jmiDeleteAEntryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmiDeleteAEntryActionPerformed
 
         this.bDeleteActionPerformed(evt);
-    }//GEN-LAST:event_hmiDeleteAEntryActionPerformed
+    }//GEN-LAST:event_jmiDeleteAEntryActionPerformed
 
-    /**
-     * Launching this Frame from here.....
-     */
+    private void tblContactListMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblContactListMouseClicked
+
+        try {
+
+            String display;
+            String numbers = "";
+            int index = this.tblContactList.getSelectedRow();
+
+            this.contactModel = this.contactModels.get(index);
+
+            for (String x : this.contactModel.getNumbers()) {
+
+                numbers += (x + "\n");
+            }
+
+            display = "Name: " + this.contactModel.getName() + "\n\n"
+                    + "Numbers:\n"
+                    + numbers + "\n\n"
+                    + "Email:\n" + this.contactModel.getEmailID() + "\n\n"
+                    + "Address:\n" + this.contactModel.getAddress() + "\n\n"
+                    + "Website:\n" + this.contactModel.getWebsite();
+
+            this.tfDetailsInformation.setText(display);
+        } catch (Exception e) {
+
+            JOptionPane.showMessageDialog(null, e);
+        }
+    }//GEN-LAST:event_tblContactListMouseClicked
+
+    private void jmiRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmiRefreshActionPerformed
+
+        try {
+
+            this.initializeContactList();
+        } catch (Exception e) {
+
+            JOptionPane.showMessageDialog(null, e);
+        }
+    }//GEN-LAST:event_jmiRefreshActionPerformed
+
+    private void tfSearchBoxKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tfSearchBoxKeyReleased
+
+        try {
+
+            this.clearTable();
+
+            String searchKey = this.tfSearchBox.getText();
+            String sql;
+
+            switch ((String) this.cbSearchBy.getSelectedItem()) {
+
+                case "By Name": {
+
+                    sql = "SELECT * FROM numbers WHERE name LIKE \"" + searchKey + "%\"";
+                    break;
+                }
+                case "By Phone Number": {
+
+                    break;
+                }
+                case "By Email": {
+
+                    break;
+                }
+            }
+        } catch (Exception e) {
+
+            JOptionPane.showMessageDialog(null, e);
+        }
+    }//GEN-LAST:event_tfSearchBoxKeyReleased
+
     public static void launch() {
-        
-        
+
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -276,8 +467,7 @@ public class MainFrame extends javax.swing.JFrame {
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(MainFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
-        
-        
+
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
@@ -290,18 +480,20 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JButton bAddNew;
     private javax.swing.JButton bDelete;
     private javax.swing.JButton bEdit;
-    private javax.swing.JComboBox cmSearchBy;
-    private javax.swing.JMenuItem hmiDeleteAEntry;
+    private javax.swing.JComboBox cbSearchBy;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JMenu jmFile;
     private javax.swing.JMenu jmHelp;
     private javax.swing.JMenuItem jmiAddNewEntry;
+    private javax.swing.JMenuItem jmiDeleteAEntry;
     private javax.swing.JMenuItem jmiEditAEntry;
     private javax.swing.JMenuItem jmiNeedHelp;
     private javax.swing.JMenuItem jmiQuit;
+    private javax.swing.JMenuItem jmiRefresh;
     private javax.swing.JMenuBar mbOne;
     private javax.swing.JPanel pOne;
     private javax.swing.JTable tblContactList;

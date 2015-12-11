@@ -2,6 +2,11 @@
 
 <Form version="1.5" maxVersion="1.9" type="org.netbeans.modules.form.forminfo.JFrameFormInfo">
   <NonVisualComponents>
+    <Component class="javax.swing.JMenuItem" name="jMenuItem1">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="jMenuItem1"/>
+      </Properties>
+    </Component>
     <Menu class="javax.swing.JMenuBar" name="mbOne">
       <SubComponents>
         <Menu class="javax.swing.JMenu" name="jmFile">
@@ -17,6 +22,14 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jmiAddNewEntryActionPerformed"/>
               </Events>
             </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jmiRefresh">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Refresh"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jmiRefreshActionPerformed"/>
+              </Events>
+            </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="jmiEditAEntry">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Edit A Entry"/>
@@ -25,12 +38,12 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jmiEditAEntryActionPerformed"/>
               </Events>
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="hmiDeleteAEntry">
+            <MenuItem class="javax.swing.JMenuItem" name="jmiDeleteAEntry">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Delete A Entry"/>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="hmiDeleteAEntryActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jmiDeleteAEntryActionPerformed"/>
               </Events>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="jmiQuit">
@@ -124,7 +137,7 @@
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="tfSearchBox" pref="183" max="32767" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="cmSearchBy" min="-2" pref="150" max="-2" attributes="0"/>
+                          <Component id="cbSearchBy" min="-2" pref="150" max="-2" attributes="0"/>
                       </Group>
                       <Group type="102" attributes="0">
                           <EmptySpace min="-2" pref="58" max="-2" attributes="0"/>
@@ -150,7 +163,7 @@
                       <Component id="bDelete" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="jLabel1" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="tfSearchBox" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="cmSearchBy" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="cbSearchBy" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
@@ -197,8 +210,11 @@
           </Properties>
         </Component>
         <Component class="javax.swing.JTextField" name="tfSearchBox">
+          <Events>
+            <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="tfSearchBoxKeyReleased"/>
+          </Events>
         </Component>
-        <Component class="javax.swing.JComboBox" name="cmSearchBy">
+        <Component class="javax.swing.JComboBox" name="cbSearchBy">
           <Properties>
             <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
               <StringArray count="3">
@@ -242,6 +258,9 @@
                   <TableHeader reorderingAllowed="true" resizingAllowed="true"/>
                 </Property>
               </Properties>
+              <Events>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="tblContactListMouseClicked"/>
+              </Events>
             </Component>
           </SubComponents>
         </Container>
