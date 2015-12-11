@@ -7,6 +7,7 @@ package gui;
 
 import database.ConnectToDatabase;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
@@ -23,11 +24,14 @@ public class MainFrame extends javax.swing.JFrame {
     private ResultSet resultSet = null;
     private List<ContactModel> contactModels;
     private ContactModel contactModel;
+    private String sql;
 
     public MainFrame() {
         initComponents();
 
         this.defaultTableModel = (DefaultTableModel) this.tblContactList.getModel();
+        this.contactModels = new ArrayList<>();
+        this.getContactsFromDatabase();
         this.initializeContactList();
     }
 
@@ -258,10 +262,6 @@ public class MainFrame extends javax.swing.JFrame {
 
             this.clearTable();
 
-            this.contactModels = new ArrayList<>();
-
-            this.getContactsFromDatabase();
-
             for (ContactModel cm : this.contactModels) {
 
                 this.defaultTableModel.addRow(new Object[]{
@@ -279,9 +279,22 @@ public class MainFrame extends javax.swing.JFrame {
 
         try {
 
-            String sql = "SELECT * FROM numbers ORDER BY name ASC";
+            this.contactModels.clear();
 
-            this.resultSet = ConnectToDatabase.getResult(sql);
+            this.sql = "SELECT * FROM numbers ORDER BY name ASC";
+
+            this.resultSet = ConnectToDatabase.getResult(this.sql);
+
+            this.initializeContactModel();
+        } catch (Exception e) {
+
+            JOptionPane.showMessageDialog(null, e);
+        }
+    }
+
+    private void initializeContactModel() throws SQLException {
+
+        try {
 
             while (this.resultSet.next()) {
 
@@ -342,7 +355,29 @@ public class MainFrame extends javax.swing.JFrame {
 
         try {
 
-            EditEntry.launch();
+            int index = this.tblContactList.getSelectedRow();
+
+            if (index >= 0) {
+
+                this.contactModel = this.contactModels.get(index);
+
+                String numbers = "";
+                for (String num : this.contactModel.getNumbers()) {
+
+                    if (!(num.trim() == null && "".equals(num.trim()))) {
+
+                        numbers += (num + ",");
+                    }
+                }
+
+                EditEntry.setAddress(this.contactModel.getAddress());
+                EditEntry.setEmailID(this.contactModel.getEmailID());
+                EditEntry.setNumbers(numbers);
+                EditEntry.setPersonName(this.contactModel.getName());
+                EditEntry.setWebsite(this.contactModel.getWebsite());
+
+                EditEntry.launch();
+            }
         } catch (Exception e) {
 
             JOptionPane.showMessageDialog(null, e);
@@ -355,10 +390,10 @@ public class MainFrame extends javax.swing.JFrame {
 
             int index = this.tblContactList.getSelectedRow();
 
-            String sql = "DELETE FROM numbers WHERE name = \""
+            this.sql = "DELETE FROM numbers WHERE name = \""
                     + this.defaultTableModel.getValueAt(index, 0) + "\"";
 
-            ConnectToDatabase.getResult(sql);
+            ConnectToDatabase.getResult(this.sql);
 
             this.defaultTableModel.removeRow(index);
             this.contactModels.remove(index);
@@ -416,7 +451,11 @@ public class MainFrame extends javax.swing.JFrame {
     private void jmiRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmiRefreshActionPerformed
 
         try {
-
+            
+            this.tfDetailsInformation.setText("");
+            this.contactModels.clear();
+            this.getContactsFromDatabase();
+            this.initializeContactModel();
             this.initializeContactList();
         } catch (Exception e) {
 
@@ -428,30 +467,49 @@ public class MainFrame extends javax.swing.JFrame {
 
         try {
 
-            this.clearTable();
-
             String searchKey = this.tfSearchBox.getText();
-            String sql;
+            this.tfDetailsInformation.setText("");
+
+            this.sql = "SELECT * FROM numbers ORDER BY name ASC";
 
             switch ((String) this.cbSearchBy.getSelectedItem()) {
 
                 case "By Name": {
 
-                    sql = "SELECT * FROM numbers WHERE name LIKE \"" + searchKey + "%\"";
+                    this.sql = "SELECT * FROM numbers WHERE name LIKE "
+                            + "\"" + searchKey + "%\" ORDER BY name ASC";
                     break;
                 }
                 case "By Phone Number": {
 
+                    this.sql = "SELECT * FROM numbers WHERE numbers LIKE "
+                            + "\"%" + searchKey + "%\" ORDER BY name ASC";
                     break;
                 }
                 case "By Email": {
 
+                    this.sql = "SELECT * FROM numbers WHERE mail LIKE "
+                            + "\"" + searchKey + "%\" ORDER BY name ASC";
                     break;
                 }
             }
         } catch (Exception e) {
 
             JOptionPane.showMessageDialog(null, e);
+        } finally {
+
+            try {
+
+                this.contactModels.clear();
+
+                this.resultSet = ConnectToDatabase.getResult(this.sql);
+
+                this.initializeContactModel();
+                this.initializeContactList();
+            } catch (Exception e) {
+
+                JOptionPane.showMessageDialog(null, e);
+            }
         }
     }//GEN-LAST:event_tfSearchBoxKeyReleased
 
