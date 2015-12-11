@@ -232,11 +232,13 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_jmiQuitActionPerformed
 
     private void bAddNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bAddNewActionPerformed
-        // TODO add your handling code here:
+
+        AddEntry.launch();
     }//GEN-LAST:event_bAddNewActionPerformed
 
     private void bEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bEditActionPerformed
-        // TODO add your handling code here:
+        
+        EditEntry.launch();
     }//GEN-LAST:event_bEditActionPerformed
 
     private void bDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bDeleteActionPerformed
