@@ -389,14 +389,14 @@ public class MainFrame extends javax.swing.JFrame {
         try {
 
             int index = this.tblContactList.getSelectedRow();
-
+            
             this.sql = "DELETE FROM numbers WHERE name = \""
                     + this.defaultTableModel.getValueAt(index, 0) + "\"";
+            
+            DeleteEntry.setSql(sql);
+            
+            DeleteEntry.launch();
 
-            ConnectToDatabase.getResult(this.sql);
-
-            this.defaultTableModel.removeRow(index);
-            this.contactModels.remove(index);
             this.tfDetailsInformation.setText("");
         } catch (Exception e) {
 
